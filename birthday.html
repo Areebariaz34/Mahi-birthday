@@ -1,0 +1,521 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Happy 21st Birthday Mahek! ❤️🎉</title>
+
+  <!-- Canvas Confetti Library -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      height: 100vh;
+      width: 100vw;
+      overflow: hidden;
+      background: linear-gradient(rgba(20, 0, 5, 0.8), rgba(40, 0, 10, 0.9)),
+                  url('https://images.unsplash.com/photo-1530103862676-de8c9debad1d?q=80&w=1920&auto=format&fit=crop') center/cover no-repeat;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: #fff;
+      position: relative;
+    }
+
+    /* Primary Red Palette Styling */
+    :root {
+      --primary-red: #d63031;
+      --dark-red: #8b0000;
+      --accent-gold: #ffd700;
+      --light-pink: #ffb7b2;
+    }
+
+    /* Shared Stage Container */
+    .stage {
+      position: absolute;
+      width: 90vw;
+      max-width: 480px;
+      text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(30px) scale(0.95);
+      transition: all 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      z-index: 10;
+    }
+
+    .stage.active {
+      opacity: 1;
+      visibility: visible;
+      transform: translateY(0) scale(1);
+    }
+
+    .stage.exit {
+      opacity: 0;
+      visibility: hidden;
+      transform: translateY(-40px) scale(0.9);
+    }
+
+    /* Red Themed Card Containers */
+    .card-box {
+      background: rgba(30, 0, 10, 0.85);
+      border: 2px solid var(--primary-red);
+      padding: 30px 25px;
+      border-radius: 20px;
+      box-shadow: 0 10px 30px rgba(214, 48, 49, 0.3), 0 0 20px rgba(0, 0, 0, 0.8);
+      width: 100%;
+      backdrop-filter: blur(8px);
+    }
+
+    /* Buttons */
+    .btn-red {
+      background: linear-gradient(135deg, #e17055, #d63031);
+      color: #fff;
+      border: none;
+      padding: 12px 28px;
+      font-size: 1.1rem;
+      font-weight: bold;
+      border-radius: 30px;
+      cursor: pointer;
+      margin-top: 20px;
+      box-shadow: 0 5px 15px rgba(214, 48, 49, 0.4);
+      transition: all 0.3s ease;
+    }
+
+    .btn-red:hover {
+      transform: scale(1.05);
+      background: linear-gradient(135deg, #d63031, #ff7675);
+    }
+
+    /* STAGE 1: Month Wheel Spinner */
+    .wheel-wrapper {
+      position: relative;
+      width: 220px;
+      height: 220px;
+      margin: 20px auto;
+    }
+
+    .wheel-pointer {
+      position: absolute;
+      top: -15px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 2rem;
+      z-index: 12;
+      color: var(--accent-gold);
+    }
+
+    .wheel {
+      width: 100%;
+      height: 100%;
+      border-radius: 50%;
+      border: 6px solid var(--primary-red);
+      position: relative;
+      overflow: hidden;
+      transition: transform 4s cubic-bezier(0.15, 0.85, 0.35, 1.2);
+      box-shadow: 0 0 25px rgba(214, 48, 49, 0.6);
+      background: radial-gradient(circle, #2d000a 0%, #100005 100%);
+    }
+
+    .wheel-segment {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      font-size: 0.85rem;
+      font-weight: bold;
+      color: #fff;
+      padding-top: 10px;
+      transform-origin: 50% 50%;
+    }
+
+    /* STAGE 2: Date Verification */
+    input[type="text"] {
+      width: 80%;
+      padding: 12px 15px;
+      margin-top: 15px;
+      border-radius: 10px;
+      border: 2px solid var(--primary-red);
+      background: rgba(0, 0, 0, 0.6);
+      color: #fff;
+      text-align: center;
+      font-size: 1.1rem;
+      outline: none;
+    }
+
+    .error-msg {
+      color: #ff7675;
+      font-size: 0.9rem;
+      margin-top: 8px;
+      display: none;
+    }
+
+    /* STAGE 3: Cake Loading Progress */
+    .loading-bar-container {
+      width: 100%;
+      height: 20px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 10px;
+      border: 1px solid var(--primary-red);
+      overflow: hidden;
+      margin-top: 20px;
+    }
+
+    .loading-bar {
+      width: 0%;
+      height: 100%;
+      background: linear-gradient(90deg, #d63031, #ff7675, var(--accent-gold));
+      transition: width 0.1s linear;
+    }
+
+    /* STAGE 4: Red Envelope */
+    .envelope {
+      width: 180px;
+      height: 120px;
+      background: var(--primary-red);
+      margin: 20px auto;
+      border-radius: 8px;
+      position: relative;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+      animation: pulse 1.8s infinite;
+    }
+
+    .envelope::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      border-left: 90px solid transparent;
+      border-right: 90px solid transparent;
+      border-top: 65px solid #ff4d4d;
+    }
+
+    /* STAGE 5: Photo Banner */
+    .photo-frame {
+      width: 180px;
+      height: 180px;
+      border-radius: 15px;
+      border: 4px solid var(--primary-red);
+      margin: 15px auto;
+      background-image: url('https://images.unsplash.com/photo-1513151233558-d860c5398176?q=80&w=500&auto=format&fit=crop'); /* REPLACE THIS URL WITH MAHEK'S PHOTO */
+      background-size: cover;
+      background-position: center;
+      box-shadow: 0 0 20px rgba(214, 48, 49, 0.6);
+    }
+
+    /* STAGE 7: Animated Cake & Candle */
+    .cake-box {
+      font-size: 4rem;
+      margin: 10px 0;
+      cursor: pointer;
+      position: relative;
+      display: inline-block;
+    }
+
+    .flame {
+      position: absolute;
+      top: -10px;
+      left: 50%;
+      transform: translateX(-50%);
+      font-size: 1.5rem;
+      animation: flicker 0.6s infinite alternate;
+    }
+
+    @keyframes flicker {
+      0% { opacity: 0.8; transform: translateX(-50%) scale(0.9); }
+      100% { opacity: 1; transform: translateX(-50%) scale(1.2); }
+    }
+
+    .countdown-num {
+      font-size: 3.5rem;
+      color: var(--accent-gold);
+      font-weight: bold;
+      margin: 10px 0;
+    }
+
+    .wish-text {
+      font-size: 1.8rem;
+      color: #ff7675;
+      font-weight: bold;
+      animation: blink 1s infinite alternate;
+    }
+
+    @keyframes blink {
+      from { opacity: 0.3; }
+      to { opacity: 1; }
+    }
+
+    /* STAGE 8: Continuous Wish Stream */
+    .wish-stream {
+      font-size: 1.3rem;
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #ffeaa7;
+      line-height: 1.6;
+      transition: opacity 0.5s ease-in-out;
+    }
+
+    /* General Animations */
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.05); }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- STAGE 1: MONTH WHEEL SPINNER -->
+  <div class="stage active" id="stage1">
+    <div class="card-box">
+      <h2 style="color: var(--accent-gold);">Finding Mahek's Month... 🎯</h2>
+      <div class="wheel-wrapper">
+        <div class="wheel-pointer">▼</div>
+        <div class="wheel" id="wheel"></div>
+      </div>
+      <button class="btn-red" onclick="spinWheel()">Spin Month Wheel 🎡</button>
+    </div>
+  </div>
+
+  <!-- STAGE 2: DATE ENTRY -->
+  <div class="stage" id="stage2">
+    <div class="card-box">
+      <h2 style="color: var(--accent-gold);">Verify Birth Date 🎂</h2>
+      <p style="margin-top: 10px;">Enter her special birthday date:</p>
+      <input type="text" id="dateInput" placeholder="e.g., 18 Oct 2005 or 18/10/2005">
+      <div class="error-msg" id="dateError">Oops! Please enter 18 Oct / 18 October!</div>
+      <br>
+      <button class="btn-red" onclick="verifyDate()">Submit Date ✨</button>
+    </div>
+  </div>
+
+  <!-- STAGE 3: CAKE LOADING BAR -->
+  <div class="stage" id="stage3">
+    <div class="card-box">
+      <div style="font-size: 3.5rem;">🎂</div>
+      <h2>Baking The Surprise...</h2>
+      <div class="loading-bar-container">
+        <div class="loading-bar" id="loadingBar"></div>
+      </div>
+      <div id="loadingText" style="margin-top: 12px; font-weight: bold; color: var(--accent-gold);">0%</div>
+    </div>
+  </div>
+
+  <!-- STAGE 4: RED ENVELOPE -->
+  <div class="stage" id="stage4">
+    <div class="card-box">
+      <h2 style="color: var(--accent-gold);">You Have a Sealed Letter ✉️</h2>
+      <div class="envelope" onclick="openEnvelope()"></div>
+      <p style="color: var(--light-pink);">Tap the red envelope to unseal it!</p>
+    </div>
+  </div>
+
+  <!-- STAGE 5: PHOTO BANNER -->
+  <div class="stage" id="stage5">
+    <div class="card-box">
+      <h2 style="color: var(--accent-gold);">👑 Birthday Queen Mahek 👑</h2>
+      <div class="photo-frame">
+        <img src="mahi.jpg" alt="Mahek's Photo" style="width: 100%; height: 100%; border-radius: 11px; object-fit: cover;">
+      </div>
+      <p style="font-style: italic; color: #ff7675;">"Celebrating 21 years of pure perfection!"</p>
+      <button class="btn-red" onclick="nextStage(5, 6)">Read Birthday Letter 💌</button>
+    </div>
+  </div>
+
+  <!-- STAGE 6: HEARTFELT LETTER -->
+  <div class="stage" id="stage6">
+    <div class="card-box">
+      <h2 style="color: var(--accent-gold); margin-bottom: 12px;">Dearest Mahek, 🌸</h2>
+      <p style="line-height: 1.7; text-align: left; font-size: 1.05rem;">
+        Happy 21st Birthday! 🎂✨<br><br>
+        Welcome to official adulthood! Thank you for being the most incredible best friend anyone could ask for. May your year be filled with endless laughter, boundless peace, health, and massive success in everything you do!
+      </p>
+      <button class="btn-red" onclick="nextStage(6, 7)">Light The Candles 🕯️</button>
+    </div>
+  </div>
+
+  <!-- STAGE 7: CANDLE & COUNTDOWN -->
+  <div class="stage" id="stage7">
+    <div class="card-box">
+      <h2 style="color: var(--accent-gold);" id="candleTitle">Tap Cake to Blow Candles!</h2>
+      <div class="cake-box" onclick="startCountdown()">
+        <div class="flame" id="flame">🔥</div>
+        🎂
+      </div>
+
+      <div class="countdown-num" id="countdown"></div>
+      <div class="wish-text" id="wishMsg" style="display: none;">✨ MAKE A WISH! ✨</div>
+      <br>
+      <button class="btn-red" id="wishStreamBtn" style="display: none;" onclick="startWishStream()">Receive Birthday Wishes ❤️</button>
+    </div>
+  </div>
+
+  <!-- STAGE 8: CONTINUOUS WISHES STREAM -->
+  <div class="stage" id="stage8">
+    <div class="card-box">
+      <h2 style="color: var(--accent-gold); margin-bottom: 20px;">💖 Endless Wishes for Mahek 💖</h2>
+      <div class="wish-stream" id="wishStream">Starting your wishes...</div>
+    </div>
+  </div>
+
+  <script>
+    // Initialize Wheel Segments
+    const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "OCTOBER", "Nov", "Dec"];
+    const wheel = document.getElementById('wheel');
+    
+    months.forEach((month, index) => {
+      const seg = document.createElement('div');
+      seg.className = 'wheel-segment';
+      seg.style.transform = `rotate(${index * 30}deg)`;
+      seg.innerText = month;
+      wheel.appendChild(seg);
+    });
+
+    // Helper Stage Navigator
+    function nextStage(current, next) {
+      document.getElementById(`stage${current}`).classList.remove('active');
+      document.getElementById(`stage${current}`).classList.add('exit');
+      setTimeout(() => {
+        document.getElementById(`stage${next}`).classList.add('active');
+      }, 400);
+    }
+
+    // STAGE 1: Spin Wheel to October
+    function spinWheel() {
+      // Rotate 5 full turns plus stopping on October index (Index 9)
+      const degrees = 360 * 5 + (360 - (9 * 30));
+      wheel.style.transform = `rotate(${degrees}deg)`;
+
+      triggerConfettiBurst();
+
+      setTimeout(() => {
+        nextStage(1, 2);
+      }, 4500);
+    }
+    
+    // STAGE 2: Date Verification
+    function verifyDate() {
+      const input = document.getElementById('dateInput').value.toLowerCase();
+      // Accepts variations containing 18 & oct
+      if ((input.includes('18') && input.includes('oct')) || input.includes('18/10') || input.includes('18-10')) {
+        document.getElementById('dateError').style.display = 'none';
+        nextStage(2, 3);
+        startLoading();
+      } else {
+        document.getElementById('dateError').style.display = 'block';
+      }
+    }
+
+    // STAGE 3: Loading Progress 0 to 100%
+    function startLoading() {
+      let progress = 0;
+      const bar = document.getElementById('loadingBar');
+      const text = document.getElementById('loadingText');
+      
+      const interval = setInterval(() => {
+        progress += 2;
+        bar.style.width = `${progress}%`;
+        text.innerText = `${progress}%`;
+
+        if (progress >= 100) {
+          clearInterval(interval);
+          setTimeout(() => nextStage(3, 4), 600);
+        }
+      }, 50);
+    }
+
+    // STAGE 4: Open Envelope
+    function openEnvelope() {
+      triggerConfettiBurst();
+      nextStage(4, 5);
+    }
+
+    // STAGE 7: Candle Countdown
+    function startCountdown() {
+      let count = 3;
+      const countDisplay = document.getElementById('countdown');
+      const candleTitle = document.getElementById('candleTitle');
+
+      candleTitle.innerText = "Get Ready...";
+      countDisplay.innerText = count;
+
+      const timer = setInterval(() => {
+        count--;
+        if (count > 0) {
+          countDisplay.innerText = count;
+        } else {
+          clearInterval(timer);
+          countDisplay.innerText = "";
+          document.getElementById('flame').style.display = 'none'; // Blow flame out
+          candleTitle.style.display = 'none';
+          document.getElementById('wishMsg').style.display = 'block';
+          document.getElementById('wishStreamBtn').style.display = 'inline-block';
+          
+          triggerFireworks();
+        }
+      }, 1000);
+    }
+
+    // STAGE 8: Continuous Wish Stream
+    function startWishStream() {
+      nextStage(7, 8);
+
+      const wishes = [
+        "🌟 May your 21st year shine as bright as your smile, Mahek!",
+        "🎉 Wishing you boundless happiness, peace, and endless laughter!",
+        "🌸 May all your dreams and ambitions come true this year!",
+        "✨ Cheers to another year of amazing memories and bestie bond!",
+        "👑 Stay iconic, stay beautiful, and stay as wonderful as you are!",
+        "💖 May your day be filled with lots of love, cake, and joy!"
+      ];
+
+      let wishIndex = 0;
+      const streamDiv = document.getElementById('wishStream');
+
+      setInterval(() => {
+        streamDiv.style.opacity = 0;
+        setTimeout(() => {
+          streamDiv.innerText = wishes[wishIndex];
+          streamDiv.style.opacity = 1;
+          wishIndex = (wishIndex + 1) % wishes.length;
+        }, 500);
+      }, 3500);
+    }
+
+    // Animation Helpers
+    function triggerConfettiBurst() {
+      confetti({ particleCount: 70, spread: 70, origin: { y: 0.6 } });
+    }
+
+    function triggerFireworks() {
+      var duration = 4 * 1000;
+      var animationEnd = Date.now() + duration;
+
+      var interval = setInterval(function() {
+        var timeLeft = animationEnd - Date.now();
+        if (timeLeft <= 0) return clearInterval(interval);
+
+        confetti({
+          particleCount: 50,
+          startVelocity: 30,
+          spread: 360,
+          origin: { x: Math.random(), y: Math.random() - 0.2 },
+          colors: ['#d63031', '#ffd700', '#ffffff', '#ff7675']
+        });
+      }, 250);
+    }
+  </script>
+</body>
+</html>
